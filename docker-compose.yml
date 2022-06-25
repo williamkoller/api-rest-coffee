@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    entrypoint: sh -c "yarn && yarn start:dev"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: localhost
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    networks:
+      - app_network
+
+  postgres:
+    container_name: postgres
+    image: postgres:13.3-alpine
+    environment:
+      POSTGRES_USER: ${TYPEORM_USERNAME}
+      POSTGRES_PASSWORD: ${TYPEORM_PASSWORD}
+      POSTGRES_DB: ${TYPEORM_DATABASE}
+      POSTGRES_HOST: ${TYPEORM_HOST}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - ${TYPEORM_PORT}:${TYPEORM_PORT}
+    volumes:
+      - api-data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  api-data:
+
+networks:
+  app_network:
